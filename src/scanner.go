@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 type Scanner struct {
 	chars  []byte
 	char   int
@@ -13,6 +15,7 @@ func (s *Scanner) scanTokens() {
 		s.start = s.char
 		s.scanToken()
 	}
+	fmt.Println(s.tokens)
 }
 
 func (s *Scanner) addToken(tokenType TokenType, literal interface{}) {
@@ -24,51 +27,51 @@ func (s *Scanner) addClearToken(tokenType TokenType) {
 	s.addToken(tokenType, nil)
 }
 
-func (s *Scanner) scanToken() {
+func (s *Scanner) scanToken() TokenType {
 	char := s.advance()
 	switch char {
 	case '-':
 		if s.match('0') {
-			s.addClearToken(NULL)
+			return NULL
 		} else if s.match('-') {
-			s.addClearToken(DECREASE)
+			return DECREASE
 		} else {
-			s.addClearToken(MINUS)
+			return  MINUS
 		}
 	case '$':
-		s.addClearToken(VAR)
+		return VAR
 	case '<':
 		if s.match('<') {
-			s.addClearToken(PRINT)
+			return PRINT
 		} else if s.match('=') {
-			s.addClearToken(BIGGER_OR_EQUAL)
+			return BIGGER_OR_EQUAL
 		} else {
-			s.addClearToken(BIGGER)
+			return BIGGER
 		}
 	case '>':
 		if s.match('>') {
-			s.addClearToken(SCAN)
+			return SCAN
 		} else if s.match('=') {
-			s.addClearToken(SMALLER_OR_EQUAL)
+			return SMALLER_OR_EQUAL
 		} else {
-			s.addClearToken(SMALLER)
+			return SMALLER
 		}
 	case '=':
 		if s.match('=') {
-			s.addClearToken(EQUAL)
+			return EQUAL
 		} else {
-			s.addClearToken(ASSIGN)
+			return ASSIGN
 		}
 	case '!':
 		if s.match('=') {
-			s.addClearToken(NOT_EQUAL)
+			return NOT_EQUAL
 		} else {
-			s.addClearToken(FALSE)
+			return FALSE
 		}
 	case '{':
-		s.addClearToken(BRACE_OPEN)
+		return BRACE_OPEN
 	case '}':
-		s.addClearToken(BRACE_CLOSE)
+		return BRACE_CLOSE
 	case '(':
 		s.addClearToken(PAREN_OPEN)
 	case ')':
@@ -93,8 +96,6 @@ func (s *Scanner) scanToken() {
 		} else {
 			s.addClearToken(THIS)
 		}
-	case ';':
-		s.addClearToken(SEMICOLON)
 	case '?':
 		s.addClearToken(IF)
 	case ':':
@@ -135,13 +136,17 @@ func (s *Scanner) scanToken() {
 		}
 	case '"':
 		s.string()
+	case ' ', '\r', '\t','\n':
+		break
+	case ';':
+		s.line++
 	default:
 		if s.isDigit(char) {
 			s.number()
 		} else if s.isAlpha(char) {
 			s.identifier()
 		} else {
-			e.lineError(s.line, "Unexpected character.")
+			e.tokenError(s.line,char, "Unexpected character.")
 		}
 	}
 

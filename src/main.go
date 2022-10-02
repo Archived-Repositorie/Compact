@@ -8,6 +8,7 @@ import (
 var isError bool
 var errors []string
 var e = Error{}
+var s Scanner
 
 func main() {
 	args := os.Args[1:]
@@ -30,6 +31,6 @@ func runFile(path string) {
 	if err != nil {
 		log.Fatalln("Error: "+err.Error())
 	}
-	s := Scanner{chars: file, char: 0}
+	s = Scanner{chars: file, char: 0}
 	s.scanTokens()
 }
